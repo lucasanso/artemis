@@ -1,0 +1,11 @@
+.env.dev
+.env.hom
+.env.prod
+
+venv/
+./venv
+env/
+
+__pycache__/
+*.pyc
+*.log
