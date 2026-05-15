@@ -1,0 +1,146 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: artemis-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - artemis-mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}
+    networks:
+     - artemis-network
+
+  mongo-express:
+    container_name: artemis-mongo-express
+    image: mongo-express
+    depends_on:
+      - mongodb
+    networks:
+      - artemis-network
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=artemis-mongo
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_DB_USER}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_DB_PASSWORD}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD}
+    ports:
+      - '8081:8081'
+  minio:
+    image: quay.io/minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    container_name: artemis-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    volumes:
+      - artemis_minio:/data
+    command: server /data --console-address ":9001"
+    networks:
+     - artemis-network
+  postgres:
+    image: postgres:latest
+    container_name: artemis-postgres
+    environment:
+      POSTGRES_USER: artemis_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: demo
+    ports:
+      - "5433:5432"
+    volumes:
+      - artemis-postgres:/var/lib/postgresql
+    networks:
+      - artemis-network
+
+  pgadmin4:
+    image: dpage/pgadmin4:latest
+    container_name: artemis-pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    depends_on:
+      - postgres
+    ports:
+      - "7000:80"
+    networks:
+      - artemis-network
+  kafka:
+    image: apache/kafka:latest
+    hostname: broker
+    container_name: artemis-kafka
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+  metabase:
+    image: metabase/metabase:latest
+    container_name: artemis-metabase
+    volumes:
+      - artemis-metabase:/dev/random:ro
+    ports:
+      - 3000:3000
+
+    networks:
+      - artemis-network
+
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  grafana:
+    image: grafana/grafana:latest
+    container_name: artemis-grafana
+    ports:
+      - 3001:3000
+    networks:
+      - artemis-network
+    volumes:
+      - artemis-grafana:/var/lib/grafana
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: artemis-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+      - artemis-prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - artemis-network
+
+networks:
+  artemis-network:
+    name: artemis-network
+    driver: bridge
+
+volumes:
+  artemis-mongo:
+  artemis_minio:
+  artemis-postgres:
+  artemis-metabase:
+  artemis-prometheus:
+  artemis-grafana:
