@@ -1,11 +1,15 @@
 .env.dev
 .env.hom
 .env.prod
-
+.env
+.env.consumer
 venv/
 ./venv
 env/
 
+
 __pycache__/
 *.pyc
 *.log
+
+n8n-compose/local-files/

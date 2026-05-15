@@ -1,0 +1,11 @@
+# mongodb_lamcad:
+#   uri: "mongodb://artemis_admin:artemis123@mongodb:27017/?authSource=admin"
+#   database: "sanso"
+#   accepted_news_collection: "noticiasAceitas"
+#   unaccepted_news_collection: "noticiasRecusadas"
+#   logs_collection: "logsExtracoes"
+  
+# smtp_email:
+#   email_from: "lucasansodev@gmail.com"
+#   app_passw: "ocvaduweeffhauka"
+#   email_to: "santos.lucas@discente.ufg.br"

@@ -1,0 +1,23 @@
+repos:
+  # 1. Hooks nativos básicos
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  # 2. Detector de Vazamento de Credenciais (Gitleaks)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+
+  # 3. Linter e Formatador Ultra-rápido (Ruff)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff          # Executa o linter (procura erros e organiza imports)
+        args: [ --fix ]   # Corrigir automaticamente o que for possível
+      - id: ruff-format   # Executa o formatador (estilo do código, substitui o Black)
