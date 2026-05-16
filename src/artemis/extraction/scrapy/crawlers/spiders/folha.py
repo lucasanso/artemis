@@ -42,7 +42,7 @@ class FolhaSpider(BaseSpider):
         self.processed_kwords = get_processed_kwords(self.name)
 
     def start_requests(self):
-        palavras = KEYWORDS["GANGS"] + KEYWORDS["ORGANIZED CRIME"]
+        palavras = KEYWORDS["ACAO_VIOLENTA"] + KEYWORDS["AGRESSOR"]
         anos = YEARS
         meses = [m for m in range(1, 13)]
 
@@ -129,10 +129,10 @@ class FolhaSpider(BaseSpider):
                 item["last_update"] = fmt_date
 
             item["acquisition_date"] = datetime.now(pytz.timezone('America/Sao_Paulo')).strftime(r'%d-%m-%Y') 
-            item["newspaper"] = "FolhaSP"
+            item["newspaper"] = "Folha de São Paulo"
             item["url"] = response.url
             item["accepted_by"] = validate_article(article) 
-            item["gangs"] = search_gangs(article)
+            item['punishers'] = search_gangs(article)
             item["manual_relevance_class"] = None 
             item["id_event"] = None
         
@@ -159,7 +159,7 @@ class FolhaSpider(BaseSpider):
             item['last_update'] = str(publication_date).strip()
             item['newspaper'] = "Folha de São Paulo" 
             item['url'] = response.url
-            item['gangs'] = search_gangs(article)
+            item['punishers'] = search_gangs(article)
             item['manual_relevance_class'] = None
         elif response.css('#articleNew'):
             item['title'] = str(response.css('h1::text')[1].get()).strip()
@@ -180,7 +180,7 @@ class FolhaSpider(BaseSpider):
             item['last_update'] = publication_date
             item['newspaper'] = "Folha de São Paulo" 
             item['url'] = response.url
-            item['gangs'] = search_gangs(article)
+            item['punishers'] = search_gangs(article)
             item['manual_relevance_class'] = None
 
         yield item

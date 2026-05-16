@@ -1,0 +1,3 @@
+dotenv
+confluent_kafka
+pymongo

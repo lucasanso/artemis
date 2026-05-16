@@ -21,7 +21,7 @@ class CrawlersPipeline:
     """
     def __init__(self) -> None:
         self.kafka_producer_config = {
-            'bootstrap.servers' : 'localhost:9092',
+            'bootstrap.servers' : 'broker:29092',
             'client.id' : 'scrapy'
         }
 

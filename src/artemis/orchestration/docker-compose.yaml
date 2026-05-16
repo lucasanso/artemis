@@ -111,6 +111,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    user: "0:0"
 
   airflow-dag-processor:
     <<: *airflow-common
@@ -148,6 +149,7 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+    user: "0:0"
 
   airflow-triggerer:
     <<: *airflow-common
@@ -164,7 +166,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-
+    user: "0:0"
+    
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash

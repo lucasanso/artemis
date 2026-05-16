@@ -72,7 +72,7 @@ class DiplomatiqueSpider(BaseSpider):
         if self.user_keyword:
             full_list = [self.user_keyword]
         else:
-            full_list = KEYWORDS.get('GANGS', []) + KEYWORDS.get('ORGANIZED CRIME', [])
+            full_list = KEYWORDS.get('ACAO_VIOLENTA', []) + KEYWORDS.get('AGRESSOR', [])
 
         done = get_processed_kwords(self.name)
         self.search_keywords = [k for k in full_list if k not in done]
@@ -136,7 +136,7 @@ class DiplomatiqueSpider(BaseSpider):
                 item['newspaper'] = self.article_newspaper_name
                 item['article'] = article_body
                 item['accepted_by'] = validate
-                item['gangs'] = search_gangs(article_body)
+                item['punishers'] = search_gangs(article_body)
                 item['manual_relevance_class'] = None
             else:
                 item['url'] = response.url

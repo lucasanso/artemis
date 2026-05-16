@@ -1,72 +1,39 @@
 import json
 import os
 from datetime import date
-
 import pymongo
 from confluent_kafka import Consumer, KafkaError
 from dotenv import load_dotenv
 from pymongo.errors import DuplicateKeyError
 from scrapy_kafka_processor import TransformData
+from datetime import timedelta, datetime
 
 load_dotenv(dotenv_path=".env.consumer")
-# from minio import Minio
-# from datetime import datetime
-# import io
 
 # Configurações do Broker
 conf = {
     # alterado host de localhost para broker
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': 'broker:29092',
     'group.id': 'artemis-scrapy-consumer', 
-    'auto.offset.reset': 'earliest',
-    'enable.auto.commit': True
+    'auto.offset.reset': 'earliest'
 }
 
+# Tempo de consumo do Kafka com timeout configurado
 class KafkaPyConsumer:
     def __init__(self):
         self.consumer = Consumer(conf)
         self.consumer.subscribe([os.getenv("KAFKA_TOPIC")])
         self.client = None
-        # Configurações MinIO
-        # self.minio_configs = configs['minio']
-        # self.minio_client = Minio(
-        #     self.minio_configs['endpoint'],
-        #     access_key=self.minio_configs['access_key'],
-        #     secret_key=self.minio_configs['secret_key'],
-        #     secure=self.minio_configs['secure']
-        # )
 
-        print(f"[PROCESO] Iniciando Consumer no grupo: {conf['group.id']}")
-        print(f"[PROCESSO] Aguardando mensagens do tópico '{os.getenv("KAFKA_TOPIC")}'...")
+        print(f"[PROCESSO] Iniciando Consumer no grupo: {conf['group.id']}")
+        print(f"[PROCESSO] Aguardando mensagens do tópico {os.getenv('KAFKA_TOPIC')}...")
 
-        # self._ensure_bucket_exists()
-
-    # def _ensure_bucket_exists(self):
-    #     bucket = self.minio_configs['bucket_name']
-    #     if not self.minio_client.bucket_exists(bucket):
-    #         self.minio_client.make_bucket(bucket)
-    #         print(f"[MINIO] Bucket '{bucket}' criado.")
-
-    # def upload_to_minio(self, content: dict, filename: str):
-    #     """Converte o dict em JSON e envia para o MinIO"""
-    #     try:
-    #         # Converter dict para bytes
-    #         json_data = json.dumps(content, ensure_ascii=False, default=str).encode('utf-8')
-    #         data_stream = io.BytesIO(json_data)
-            
-    #         self.minio_client.put_object(
-    #             self.minio_configs['bucket_name'],
-    #             f"news/{filename}.json",
-    #             data_stream,
-    #             length=len(json_data),
-    #             content_type='application/json'
-    #         )
-    #     except Exception as e:
-    #         print(f"[ERRO MINIO] Falha ao fazer upload: {e}")
-
-    def queue_monitoring(self):
+    def queue_monitoring(self, timeout=30):
+        now = datetime.now()
+        end = now + timedelta(seconds=timeout)
+        print(f"[AVISO] Timeout configurado: {timeout}s")
         try:
-            while True:
+            while datetime.now() < end:
                 msg = self.consumer.poll(5.0) 
 
                 if msg is None:
@@ -89,36 +56,26 @@ class KafkaPyConsumer:
                             content["last_update"] = self.processing(content.get("last_update"))
                             content["article"] = TransformData.clean_string(content.get("article"))
                             self.accepted_news_collection.insert_one(content)
-                            # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-
-                            # # Opcional: Manter o id_event junto ao timestamp para unicidade absoluta
-                            # file_name = f"news_{timestamp}_id{content.get('id_event', 'unknown')}"
-
-                            # self.upload_to_minio(content, file_name)
-                            # print(f"[SUCESSO] JSON enviado para o MinIO: {file_name}.json")
+                        
                             print("[SUCESSO] Notícia aceita inserida")
 
                         else:
                             if content.get("url") is None or not content.get("url"):
                                 continue
-
-                            self.unaccepted_news_collection.insert_one(content)
-                            # Opcional: Manter o id_event junto ao timestamp para unicidade absoluta
-                            # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                            # file_name = f"news_{timestamp}_id{content.get('id_event', 'unknown')}"
-
-                            # self.upload_to_minio(content, file_name)
-                            # print(f"[SUCESSO] JSON enviado para o MinIO: {file_name}.json")
-                            print("[SUCESSO] Notícia recusada inserida") 
+                            unaccepted = {
+                                'url' : content.get('url')
+                            }
+                            self.unaccepted_news_collection.insert_one(unaccepted)
                             
+                            print("[SUCESSO] Notícia recusada inserida")
+
                     except DuplicateKeyError:
                         print("[AVISO] Notícia já está no banco")
 
-                    # except AttributeError:
-                    #     print(f"[ERRO] Tem algo de errado com a formatação: {content}")
-                
+            print("[SUCESSO] Consumer finalizado")
+
         except KeyboardInterrupt:
-            print("\n[AVISO] Encerrando consumer...")
+            print("\n[AVISO] Encerrando consumer de maneira forçada...")
         finally:
             self.consumer.close()
 
