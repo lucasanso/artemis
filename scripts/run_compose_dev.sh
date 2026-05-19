@@ -1,1 +1,1 @@
-docker-compose --env-file .env.dev up -d
+cd .. && docker-compose --env-file .env.dev up -d && cd src/artemis/orchestration && docker compose up -d

@@ -38,7 +38,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
     volumes:
-      - artemis_minio:/data
+      - artemis-minio:/data
     command: server /data --console-address ":9001"
     networks:
      - artemis-network
@@ -92,6 +92,14 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    networks:
+      - artemis-network
   metabase:
     image: metabase/metabase:latest
     container_name: artemis-metabase
@@ -132,14 +140,39 @@ services:
     networks:
       - artemis-network
 
+  scrapy:
+    build: 
+      context: ./src/artemis/extraction/scrapy
+      dockerfile: Dockerfile
+    container_name: artemis-scrapy
+    networks:
+      - artemis-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  scrapy-consumer:
+    container_name: artemis-scrapy-consumer
+    build:
+      context: ./src/artemis/streaming
+      dockerfile: Dockerfile
+    networks:
+      - artemis-network
+    tty: true
+    stdin_open: true
+    command: python3 scrapy_kafka_consumer.py
+    depends_on:
+      kafka:
+        condition: service_healthy
+
 networks:
   artemis-network:
     name: artemis-network
     driver: bridge
 
 volumes:
+  artemis-minio:
   artemis-mongo:
-  artemis_minio:
   artemis-postgres:
   artemis-metabase:
   artemis-prometheus:
