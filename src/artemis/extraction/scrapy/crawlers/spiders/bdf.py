@@ -9,7 +9,6 @@ from ..keywords import KEYWORDS
 from ..utils import (
     get_processed_kwords,
     save_processed_kword,
-    search_gangs,
     validate_article,
 )
 from .base_spider import BaseSpider
@@ -41,7 +40,7 @@ class BdfSpider(BaseSpider):
         self.processed_kwords = get_processed_kwords(self.name)
 
     def start_requests(self):
-        palavras = KEYWORDS['ACAO_VIOLENTA'] + KEYWORDS['AGRESSOR']
+        palavras = KEYWORDS['AGRESSOR'] + KEYWORDS['ACAO_VIOLENTA'] 
         
         for p in palavras:
             if self.processed_kwords and p in self.processed_kwords:
@@ -103,18 +102,31 @@ class BdfSpider(BaseSpider):
         validate = validate_article(full_text)
 
         if validate:
-            item['title'] = response.css('h1::text').get()
-            item['article'] = full_text
-            item['keyword'] = response.meta.get('keyword')
+            item['titulo'] = response.css('h1::text').get()
+            item['corpo_texto'] = full_text
+            item['palavra_chave'] = response.meta.get('keyword')
 
             date = response.url[32:42]
-            item['publication_date'] = date
-            item['last_update'] = date
-            item['acquisition_date'] = datetime.now(pytz.timezone('America/Sao_Paulo')).strftime(r'%d-%m-%Y')
-
-            item['accepted_by'] = validate
-            item['newspaper'] = 'Brasil de Fato'
-            item['punishers'] = search_gangs(full_text)
+            item['data_noticia'] = date
+            item['data_coleta'] = datetime.now(pytz.timezone('America/Sao_Paulo')).strftime(r'%d-%m-%Y')
+            item['aceito_por'] = validate
+            item['portal'] = 'Brasil de Fato'
+            item['data_evento'] = None
+            item['historico_agressao'] = None
+            item['medida_protetiva'] = None
+            item['espaco'] = None
+            item['municipio'] = None
+            item['estado'] = None
+            item['causa'] = None
+            item['vitima_idade'] = None
+            item['agressor_idade'] = None
+            item['preso'] = None
+            item['auto_exterminio'] = None
+            item['profissao_agressor'] = None
+            item['vinculo'] = None
+            item['classificacao_automatica'] = None
+            item['confianca_modelo'] = None
+            item['data_classificacao'] = None
 
         item['url'] = response.url
 

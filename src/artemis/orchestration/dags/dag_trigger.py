@@ -27,7 +27,7 @@ with DAG('artemis_extraction_pipeline', default_args=default_args, schedule='@da
     brasil_de_fato = DockerOperator(
         task_id='rodar_crawler_bdf',
         image='artemis-scrapy:latest',
-        command='scrapy crawl bdf -s CLOSESPIDER_TIMEOUT=30',
+        command='scrapy crawl bdf -s CLOSESPIDER_TIMEOUT=300',
         network_mode='artemis-network',
         auto_remove='force',
         # environment={
@@ -36,21 +36,21 @@ with DAG('artemis_extraction_pipeline', default_args=default_args, schedule='@da
         # }
     )
 
-    folha_sp = DockerOperator(
-        task_id='rodar_crawler_fsp',
-        image='artemis-scrapy:latest',
-        command='scrapy crawl folha -s CLOSESPIDER_TIMEOUT=30',
-        network_mode='artemis-network',
-        auto_remove='force',
-    )
+    # folha_sp = DockerOperator(
+    #     task_id='rodar_crawler_fsp',
+    #     image='artemis-scrapy:latest',
+    #     command='scrapy crawl folha -s CLOSESPIDER_TIMEOUT=30',
+    #     network_mode='artemis-network',
+    #     auto_remove='force',
+    # )
 
-    diplomatique = DockerOperator(
-        task_id='rodar_diplomatique',
-        image='artemis-scrapy:latest',
-        command='scrapy crawl diplomatique -s CLOSESPIDER_TIMEOUT=30',
-        network_mode='artemis-network',
-        auto_remove='force',
-    )
+    # diplomatique = DockerOperator(
+    #     task_id='rodar_diplomatique',
+    #     image='artemis-scrapy:latest',
+    #     command='scrapy crawl diplomatique -s CLOSESPIDER_TIMEOUT=30',
+    #     network_mode='artemis-network',
+    #     auto_remove='force',
+    # )
 
     # chama_consumer = TriggerDagRunOperator(
     #     task_id="chama_consumer",
@@ -71,4 +71,4 @@ with DAG('artemis_extraction_pipeline', default_args=default_args, schedule='@da
         task_id="encerrar"
     )
 
-    inicia_processo >> [brasil_de_fato, folha_sp, diplomatique] >> encerra_processo
+    inicia_processo >> [brasil_de_fato] >> encerra_processo

@@ -21,7 +21,7 @@ def validate_article(article):
         if re.findall(fr'{k}', article):
             action = k
 
-    return f"{group} - {action}" if group and action else False
+    return f"{action} - {group}" if group and action else False
 
 def search_gangs (article):
     ACAO = KEYWORDS["ACAO_VIOLENTA"]
