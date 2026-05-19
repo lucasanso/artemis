@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS regioes (
     id SERIAL PRIMARY KEY,
     nome_regiao VARCHAR(20) UNIQUE NOT NULL
@@ -45,7 +44,7 @@ CREATE TABLE IF NOT EXISTS causas (
 
 CREATE TABLE IF NOT EXISTS artigos (
     id SERIAL PRIMARY KEY,
-    id_mongo UUID UNIQUE NOT NULL,
+    id_mongo VARCHAR(24) UNIQUE NOT NULL,
     id_portal INTEGER REFERENCES portais_de_noticia (id),
     titulo VARCHAR(500) NOT NULL,
     data_publicacao DATE NOT NULL,
@@ -60,8 +59,7 @@ CREATE TABLE IF NOT EXISTS artigos (
     historico_agressao BOOLEAN,
     medida_protetiva BOOLEAN,
     auto_exterminio BOOLEAN,
-    preso BOOLEAN,
-);
+    preso BOOLEAN
 
 INSERT INTO regioes (nome_regiao) VALUES 
 ('Norte'),
@@ -71,14 +69,15 @@ INSERT INTO regioes (nome_regiao) VALUES
 ('Sul')
 ON CONFLICT (nome_regiao) DO NOTHING;
 
-INSERT INTO estados (sigla, nome_estado, id_regiao) VALUES ('AC', 'Acre', 1), ('AL', 'Alagoas', 2), ('AP', 'Amapá', 1),
-('AM', 'Amazonas', 1), ('BA', 'Bahia', 2), ('CE', 'Ceará', 2), ('DF', 'Distrito Federal', 3), ('ES', 'Espírito Santo', 4),
+INSERT INTO estados (sigla, nome_estado, id_regiao) VALUES 
+('AC', 'Acre', 1), ('AL', 'Alagoas', 2), ('AP', 'Amapá', 1), ('AM', 'Amazonas', 1), 
+('BA', 'Bahia', 2), ('CE', 'Ceará', 2), ('DF', 'Distrito Federal', 3), ('ES', 'Espírito Santo', 4),
 ('GO', 'Goiás', 3), ('MA', 'Maranhão', 2), ('MT', 'Mato Grosso', 3), ('MS', 'Mato Grosso do Sul', 3),
 ('MG', 'Minas Gerais', 4), ('PA', 'Pará', 1), ('PB', 'Paraíba', 2), ('PR', 'Paraná', 5), ('PE', 'Pernambuco', 2),
 ('PI', 'Piauí', 2), ('RJ', 'Rio de Janeiro', 4), ('RN', 'Rio Grande do Norte', 2), ('RS', 'Rio Grande do Sul', 5),
 ('RO', 'Rondônia', 1), ('RR', 'Roraima', 1), ('SC', 'Santa Catarina', 5), ('SP', 'São Paulo', 4), ('SE', 'Sergipe', 2),
 ('TO', 'Tocantins', 1)
-ON CONFLICT (sigla) DO NOTHING;
+ON CONFLICT (sigla) DO NOTHING; 
 
 INSERT INTO portais_de_noticia (nome_portal) VALUES 
 ('Folha de São Paulo'),
