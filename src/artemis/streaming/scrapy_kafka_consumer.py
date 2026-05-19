@@ -8,7 +8,7 @@ from pymongo.errors import DuplicateKeyError
 from scrapy_kafka_processor import TransformData
 from datetime import timedelta, datetime
 
-load_dotenv(dotenv_path=".env.consumer")
+load_dotenv(dotenv_path="../../../.env.dev")
 
 # Configurações do Broker
 conf = {
@@ -50,11 +50,10 @@ class KafkaPyConsumer:
                     try:
                         content = json.loads(msg.value().decode("utf-8"))
                 
-                        if content.get("accepted_by"):
-                            content["acquisition_date"] = self.processing(content.get("acquisition_date"))
-                            content["publication_date"] = self.processing(content.get("publication_date"))
-                            content["last_update"] = self.processing(content.get("last_update"))
-                            content["article"] = TransformData.clean_string(content.get("article"))
+                        if content.get("aceito_por"):
+                            content["data_coleta"] = self.processing(content.get("data_coleta"))
+                            content["data_noticia"] = self.processing(content.get("data_noticia"))
+                            content["corpo_texto"] = TransformData.clean_string(content.get("corpo_texto"))
                             self.accepted_news_collection.insert_one(content)
                         
                             print("[SUCESSO] Notícia aceita inserida")
@@ -86,7 +85,7 @@ class KafkaPyConsumer:
             self.unaccepted_news_collection = self.client.get_database(os.getenv("MONGO_DB_DATABASE")).get_collection(os.getenv("MONGO_DB_UNACCEPTED"))
 
         except Exception as e:
-            print(f"[ERRO] Erro ao estabelecer conexão SSH {e}")
+            print(f"[ERRO] Erro ao estabelecer conexão com o banco {e}")
     
     def processing(self, date_field: str) -> date:
         lista_processamento = [

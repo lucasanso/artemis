@@ -16,7 +16,7 @@ class MongoDatabase:
         try:
             self.client = MongoClient(self.uri)
         except ConnectionFailure as e:
-            print(f"[ERRO] Erro ao conectar com o banco {os.getenv("MONGO_DB_DATABASE")} do MongoDB: {e}")
+            print(f"[ERRO] Erro ao conectar com o banco {os.getenv('MONGO_DB_DATABASE')}: {e}")
             self.client = None
 
     def close(self):

@@ -13,6 +13,7 @@ dependencies = [
     "great-expectations>=1.17.2",
     "httpx>=0.28.1",
     "minio>=7.2.20",
+    "ollama",
     "paramiko==3.0",
     "pre-commit>=4.6.0",
     "psycopg2-binary>=2.9.12",
@@ -30,7 +31,7 @@ dependencies = [
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 95
 
 select = ["E", "F", "I"]
 

@@ -86,7 +86,7 @@ class CrawlersPipeline:
             key = str(self.data.get("id_event", "0"))
             payload = json.dumps(self.data, ensure_ascii=False, default=str).encode('utf-8')
 
-            if self.data.get("accepted_by"):
+            if self.data.get("aceito_por"):
                 spider.logger.info(f"[SUCESSO] Enviando URL {url} aceita para o Kafka")
             else:
                 spider.logger.info(f"[AVISO] Enviando URL {url} não aceita para o Kafka")
